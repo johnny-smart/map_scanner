@@ -11,7 +11,17 @@ def main():
     map_dev = open('ignored/result_map.json', 'r')
     map_dev_all = json.load(map_dev)
     map_group = filter_by_group_type(map_dev_all, '34')
+
+    sorted_group, result_lenght = result(map_group, 'key')
+
+    return sorted_group, result_lenght
+
+
+def result(map_group, configuration='default'):
     result_lenght = len(map_group)
+
+    if configuration == 'key':
+        map_group = rename(map_group)
 
     sorted_group = sort_group(map_group)
 
@@ -23,6 +33,16 @@ def main():
 
     return sorted_group, result_lenght
 
+
+def rename(dictionary):
+    for item in dictionary:
+        for name in dictionary[item]:
+            dictionary[item][name.lower()] = dictionary[item].pop(name)
+    return dictionary
+
+
+def without_config():
+    pass
 
 def filter_by_group_type(map_all, group):
 
@@ -65,12 +85,12 @@ def sort_group(map_group):
         map_group_result.update({vendor: []})
 
     for dev_name, dev in map_group.items():
-        element_34 = dev
-        if element_34.get('Hint'):
-            element_34['Hint'] = element_34['Hint'].split('\n')[0]
-            map_group_result = hint_in_vendors(element_34, map_group_result)
+        element = dev
+        if element.get('hint'):
+            element['hint'] = element['hint'].split('\n')[0]
+            map_group_result = hint_in_vendors(element, map_group_result)
         else:
-            map_group_result['None_vendor'].append(element_34)
+            map_group_result['None_vendor'].append(element)
 
     return map_group_result
 
@@ -79,13 +99,13 @@ def hint_in_vendors(element, map_group):
 
     flag = False
 
-    if isinstance(element['Name'], list):
-        element['Name'] = '-'.join(element['Name'])
+    if isinstance(element['name'], list):
+        element['name'] = '-'.join(element['name'])
 
     for vendor in vendors:
-        if element['Hint'][0:3:1] in vendors[vendor]:
-            element['Hint'] = element['Hint'].split(' ')[0]
-            map_group[vendor].append(element['Hint'])
+        if element['hint'][0:3:1] in vendors[vendor]:
+            element['hint'] = element['hint'].split(' ')[0]
+            map_group[vendor].append(element['hint'])
             flag = True
 
     if flag is False:
@@ -125,6 +145,6 @@ if __name__ == "__main__":
     if (os.path.isfile('ignored/error_vendors.json')):
         os.remove('ignored/error_vendors.json')
 
-    to_json((group['Other_vendor'], group['None_vendor']), 'C:/Project/Api_NetBox_map/ignored/error_vendors.json')
+    to_json((group['Other_vendor'], group['None_vendor']), 'ignored/error_vendors.json')
     to_json(group, 'ignored/models.json')
     print(group['Other_vendor'], '\n')
