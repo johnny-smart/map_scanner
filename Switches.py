@@ -1,7 +1,8 @@
 import json
 import os
+import config
 
-vendors = {'D_link': ['DES', 'DGS'], 'Eltex': ['MES'], 'Zyxel': ['IES'], 'Other_vendor': [], 'None_vendor': [], }
+vendors = {'D-Link': ['DES', 'DGS'], 'Eltex': ['MES'], 'Zyxel': ['IES'], 'Other_vendor': [], 'None_vendor': [], }
 # vendors.update({'Cisco': ['WS-']})
 
 
@@ -12,14 +13,14 @@ def main():
     map_dev_all = json.load(map_dev)
     map_group = filter_by_group_type(map_dev_all, '34')
 
-    sorted_group, result_lenght = result(map_group, 'key')
+    sorted_group, result_lenght, without_config = result(map_group, 'key')
 
-    return sorted_group, result_lenght
+    return sorted_group, result_lenght, without_config
 
 
 def result(map_group, configuration='default'):
     result_lenght = len(map_group)
-
+    without_conf = {}
     if configuration == 'key':
         map_group = rename(map_group)
 
@@ -27,11 +28,16 @@ def result(map_group, configuration='default'):
 
     for lists in vendors:
         if not(lists in ['Other_vendor', 'None_vendor']):
+            without_conf.update(non_config(sorted_group[lists], lists))
+
+    for lists in vendors:
+        if not(lists in ['Other_vendor', 'None_vendor']):
             sorted_group.update(untwin(sorted_group.pop(lists), lists))
+
         else:
             sorted_group.update(unlist(sorted_group.pop(lists), lists))
 
-    return sorted_group, result_lenght
+    return sorted_group, result_lenght, without_conf
 
 
 def rename(dictionary):
@@ -40,9 +46,6 @@ def rename(dictionary):
             dictionary[item][name.lower()] = dictionary[item].pop(name)
     return dictionary
 
-
-def without_config():
-    pass
 
 def filter_by_group_type(map_all, group):
 
@@ -64,15 +67,29 @@ def unlist(model_list, name_vendor):
     return {name_vendor: result}
 
 
+def non_config(model_list, name_vendor):
+    without_config = {}
+
+    for dev in model_list:
+        if config.DEVICE_TYPES.get(name_vendor):
+            if dev['hint'] not in config.DEVICE_TYPES[name_vendor]:
+                if not without_config.get(dev['hint']):
+                    without_config.update({dev['hint']:[]})
+                without_config[dev['hint']].append(dev['address'])
+        else:
+            without_config.update({name_vendor:dev['address']+' Вендор не найден в файле config'})
+    return {name_vendor:without_config}
+
+
 def untwin(model_list, name_vendor):
     result = {}
     lenght = len(model_list)
 
     for model in model_list:
-        if model.upper() not in result:
-            result.update({model.upper(): 1})
+        if model['hint'].upper() not in result:
+            result.update({model['hint'].upper(): 1})
         else:
-            result[model.upper()] += 1
+            result[model['hint'].upper()] += 1
 
     result.update({'total_count': lenght})
 
@@ -84,8 +101,8 @@ def sort_group(map_group):
     for vendor in vendors:
         map_group_result.update({vendor: []})
 
-    for dev_name, dev in map_group.items():
-        element = dev
+    for dev_name in map_group:
+        element = map_group[dev_name]
         if element.get('hint'):
             element['hint'] = element['hint'].split('\n')[0]
             map_group_result = hint_in_vendors(element, map_group_result)
@@ -105,7 +122,7 @@ def hint_in_vendors(element, map_group):
     for vendor in vendors:
         if element['hint'][0:3:1] in vendors[vendor]:
             element['hint'] = element['hint'].split(' ')[0]
-            map_group[vendor].append(element['hint'])
+            map_group[vendor].append(element)
             flag = True
 
     if flag is False:
@@ -137,14 +154,26 @@ def to_json(object_python, fname):
     json_file.close()
 
 
+def output(group, without_conf, directory='ignored'):
+    if (os.path.isfile(directory+'/error_vendors.json')):
+            os.remove(directory+'/error_vendors.json')
+
+    if (os.path.isfile(directory+'/without_conf.json')):
+        os.remove(directory+'/without_conf.json')
+
+    to_json((group['Other_vendor'], group['None_vendor']), directory+'/error_vendors.json')
+    to_json(group, directory+'/models.json')
+    to_json(without_conf, directory+'/without_conf.json')
+
+
+
 if __name__ == "__main__":
-    group, start_lenght_group = main()
+    group, start_lenght_group, without_conf = main()
 
     print(test_count(group, start_lenght_group))
 
-    if (os.path.isfile('ignored/error_vendors.json')):
-        os.remove('ignored/error_vendors.json')
+    output(group, without_conf)
 
-    to_json((group['Other_vendor'], group['None_vendor']), 'ignored/error_vendors.json')
-    to_json(group, 'ignored/models.json')
-    print(group['Other_vendor'], '\n')
+
+    print('done')
+

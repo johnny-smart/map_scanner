@@ -25,6 +25,7 @@ def filtration(xml_map, option):
 
 if __name__ == "__main__":
     map_filter=main(config.XMLMAP)
-    sorter_map, len_map = Switches.result(map_filter)
+    sorter_map, len_map, without_config = Switches.result(map_filter)
 
+    Switches.output(sorter_map, without_config,'xml')
     print('done')
