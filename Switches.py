@@ -72,10 +72,10 @@ def non_config(model_list, name_vendor):
 
     for dev in model_list:
         if config.DEVICE_TYPES.get(name_vendor):
-            if dev['hint'] not in config.DEVICE_TYPES[name_vendor]:
-                if not without_config.get(dev['hint']):
-                    without_config.update({dev['hint']:[]})
-                without_config[dev['hint']].append(dev['address'])
+            if dev['description'] not in config.DEVICE_TYPES[name_vendor]:
+                if not without_config.get(dev['description']):
+                    without_config.update({dev['description']:[]})
+                without_config[dev['description']].append(dev['address'])
         else:
             without_config.update({name_vendor:dev['address']+' Вендор не найден в файле config'})
     return {name_vendor:without_config}
@@ -86,10 +86,10 @@ def untwin(model_list, name_vendor):
     lenght = len(model_list)
 
     for model in model_list:
-        if model['hint'].upper() not in result:
-            result.update({model['hint'].upper(): 1})
+        if model['description'].upper() not in result:
+            result.update({model['description'].upper(): 1})
         else:
-            result[model['hint'].upper()] += 1
+            result[model['description'].upper()] += 1
 
     result.update({'total_count': lenght})
 
@@ -103,16 +103,16 @@ def sort_group(map_group):
 
     for dev_name in map_group:
         element = map_group[dev_name]
-        if element.get('hint'):
-            element['hint'] = element['hint'].split('\n')[0]
-            map_group_result = hint_in_vendors(element, map_group_result)
+        if element.get('description'):
+            element['description'] = element['description'].split('\n')[0]
+            map_group_result = description_in_vendors(element, map_group_result)
         else:
             map_group_result['None_vendor'].append(element)
 
     return map_group_result
 
 
-def hint_in_vendors(element, map_group):
+def description_in_vendors(element, map_group):
 
     flag = False
 
@@ -120,8 +120,8 @@ def hint_in_vendors(element, map_group):
         element['name'] = '-'.join(element['name'])
 
     for vendor in vendors:
-        if element['hint'][0:3:1] in vendors[vendor]:
-            element['hint'] = element['hint'].split(' ')[0]
+        if element['description'][0:3:1] in vendors[vendor]:
+            element['description'] = element['description'].split(' ')[0]
             map_group[vendor].append(element)
             flag = True
 
