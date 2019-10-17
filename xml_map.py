@@ -37,13 +37,14 @@ def scan_map_names(filtred_map):
     return scan_failed
 
 
-def result_uploading(result, fname = 'result_map.json', directory='ignored'):
+def result_uploading(result, fname = 'result_map.json', directory=config.DIR):
     if (os.path.isfile(directory + '/' + fname)):
         os.remove(directory + '/' + fname)
 
     json_file = open(directory + '/' + fname, 'w+', encoding='utf-8')
     json_file.write(json.dumps(result))
     json_file.close()
+    print(fname)
 
 
 if __name__ == "__main__":
@@ -59,5 +60,5 @@ if __name__ == "__main__":
 
     result_uploading(scan_names,'name_epic_fail.json')
 
-    Switches.output(sorter_map, without_config, 'xml')
+    Switches.output(sorter_map, without_config, config.DIR)
     print('done')

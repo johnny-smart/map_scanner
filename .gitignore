@@ -12,6 +12,7 @@ config.py
 test.py
 *.csv
 
+Backup/
 __pycache__/
 .flake8
 ignored/

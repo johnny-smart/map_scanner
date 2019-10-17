@@ -9,9 +9,9 @@ vendors = {'D-Link': ['DES', 'DGS'], 'Eltex': ['MES'], 'Zyxel': ['IES'], 'Other_
 def main():
     map_group = {}
 
-    map_dev = open('ignored/result_map.json', 'r')
+    map_dev = open(config.DIR + 'result_map.json', 'r')
     map_dev_all = json.load(map_dev)
-    map_group = filter_by_group_type(map_dev_all, '34')
+    map_group = filter_by_group_type(map_dev_all, 'Switch')
 
     sorted_group, result_lenght, without_config = result(map_group, 'key')
 
@@ -52,7 +52,7 @@ def filter_by_group_type(map_all, group):
     map_group = {}
 
     for dev_name, dev in map_all.items():
-        if (not dev_name == 'Apperance') and dev.get('Group') == group:
+        if (not dev_name == 'Apperance') and dev.get('type-id') == group:
             map_group.update({dev_name: dev})
 
     return map_group
@@ -135,7 +135,7 @@ def test_count(map_dev, count):
     flag = None
     result_count = 0
     for vend in vendors:
-        if map_dev[vend].get('total_count'):
+        if map_dev[vend].get('total_count') != None:
             result_count += map_dev[vend]['total_count']
         else:
             result_count += len(map_dev[vend])
@@ -151,19 +151,20 @@ def test_count(map_dev, count):
 def to_json(object_python, fname):
     json_file = open(fname, 'w+', encoding='utf-8')
     json_file.write(json.dumps(object_python))
+    print(fname)
     json_file.close()
 
 
-def output(group, without_conf, directory='ignored'):
-    if (os.path.isfile(directory+'/error_vendors.json')):
-            os.remove(directory+'/error_vendors.json')
+def output(group, without_conf, directory=config.DIR):
+    if (os.path.isfile(directory+'error_vendors.json')):
+            os.remove(directory+'error_vendors.json')
 
-    if (os.path.isfile(directory+'/without_conf.json')):
-        os.remove(directory+'/without_conf.json')
+    if (os.path.isfile(directory+'without_config.json')):
+        os.remove(directory+'without_config.json')
 
-    to_json((group['Other_vendor'], group['None_vendor']), directory+'/error_vendors.json')
-    to_json(group, directory+'/models.json')
-    to_json(without_conf, directory+'/without_conf.json')
+    to_json((group['Other_vendor'], group['None_vendor']), directory+'error_vendors.json')
+    to_json(group, directory+'models.json')
+    to_json(without_conf, directory+'without_config.json')
 
 
 
