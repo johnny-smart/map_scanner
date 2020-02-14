@@ -49,7 +49,7 @@ def result_uploading(result, fname = 'result_map.json', directory=config.DIR):
 
 if __name__ == "__main__":
     map_filter = main(config.XMLMAP)
-
+    print('count_switch:',len(map_filter))
     scan_names = scan_map_names(map_filter)
 
     if config.JSONRESMAPF:
