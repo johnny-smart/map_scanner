@@ -41,8 +41,8 @@ def result_uploading(result, fname = 'result_map.json', directory=config.DIR):
     if (os.path.isfile(directory + '/' + fname)):
         os.remove(directory + '/' + fname)
 
-    json_file = open(directory + '/' + fname, 'w+', encoding='utf-8')
-    json_file.write(json.dumps(result))
+    json_file = open(directory + '/' + fname, 'w', encoding='utf-8-sig')
+    json_file.write(json.dumps(result, indent=4, sort_keys=True))
     json_file.close()
     print(fname)
 

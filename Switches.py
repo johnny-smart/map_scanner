@@ -9,7 +9,7 @@ vendors = {'D-Link': ['DES', 'DGS'], 'Eltex': ['MES'], 'Zyxel': ['IES'], 'Other_
 def main():
     map_group = {}
 
-    map_dev = open(config.DIR + 'result_map.json', 'r')
+    map_dev = open(config.DIR + 'result_map.json', 'r', encoding='utf-8-sig')
     map_dev_all = json.load(map_dev)
     map_group = filter_by_group_type(map_dev_all, 'Switch')
 
@@ -149,8 +149,8 @@ def test_count(map_dev, count):
 
 
 def to_json(object_python, fname):
-    json_file = open(fname, 'w+', encoding='utf-8')
-    json_file.write(json.dumps(object_python))
+    json_file = open(fname, 'w', encoding='utf-8-sig')
+    json_file.write(json.dumps(object_python, indent=4, sort_keys=True))
     print(fname)
     json_file.close()
 
