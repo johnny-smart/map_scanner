@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import config
 
 vendors = {'D-Link': ['DES', 'DGS'], 'Eltex': ['MES'], 'Zyxel': ['IES'], 'Other_vendor': [], 'None_vendor': [], }
@@ -104,7 +105,8 @@ def sort_group(map_group):
     for dev_name in map_group:
         element = map_group[dev_name]
         if element.get('description'):
-            element['description'] = element['description'].split('\n')[0]
+            _description = element['description'].split('\n')[0]
+            element['description'] = re.sub(r'^\[.*\]', '', _description)
             map_group_result = description_in_vendors(element, map_group_result)
         else:
             map_group_result['None_vendor'].append(element)
